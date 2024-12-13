@@ -1,0 +1,145 @@
+# Transformer Architecture Implementation Breakdown
+
+## 1. AttentionHead Class
+This is the fundamental building block of the transformer architecture.
+
+### Key Components:
+- Three linear transformations for:
+  - Keys (k): Transform input into key vectors
+  - Queries (q): Transform input into query vectors
+  - Values (v): Transform input into value vectors
+- Masking mechanism for decoder (tril): Prevents attending to future tokens
+- Dropout for regularization
+
+### Process Flow:
+1. Input tensor x with shape (batch_size, sequence_length, embedding_dim)
+2. Compute key, query, and value projections
+3. Calculate attention scores: (Q × K^T) / sqrt(head_size)
+4. Apply masking if in decoder mode
+5. Apply softmax to get attention weights
+6. Apply dropout for regularization
+7. Compute final output: attention_weights × V
+8. Return output and attention weights
+
+## 2. MultiHeadAttention Class
+Implements parallel attention heads to capture different aspects of the input.
+
+### Key Components:
+- Multiple AttentionHead instances
+- Output projection layer
+- Dropout layer
+
+### Process Flow:
+1. Process input through multiple attention heads in parallel
+2. Concatenate outputs from all heads
+3. Project concatenated output back to original embedding dimension
+4. Apply dropout
+5. Return final output and attention maps
+
+## 3. FeedForward Class
+Implements the feed-forward network component of each transformer block.
+
+### Key Components:
+- Two linear layers with ReLU activation
+- Expansion factor of 4 (common in transformer architectures)
+- Dropout layer
+
+### Process Flow:
+1. Expand input dimension by factor of 4
+2. Apply ReLU activation
+3. Project back to original dimension
+4. Apply dropout
+
+## 4. Block Class
+Represents a complete transformer block combining attention and feed-forward layers.
+
+### Key Components:
+- Multi-head self-attention layer
+- Feed-forward network
+- Two layer normalization layers
+- Residual connections
+
+### Process Flow:
+1. Apply layer normalization to input
+2. Process through self-attention
+3. Add residual connection
+4. Apply second layer normalization
+5. Process through feed-forward network
+6. Add second residual connection
+
+## 5. Encoder Class
+Implements the complete encoder stack.
+
+### Key Components:
+- Word embedding table
+- Positional embedding table
+- Multiple transformer blocks
+
+### Process Flow:
+1. Convert input tokens to embeddings
+2. Add positional embeddings
+3. Process through series of transformer blocks
+4. Return final encodings and attention maps
+
+## 6. Classifier Class
+Implements a simple classification head.
+
+### Key Components:
+- Two linear layers
+- ReLU activation
+- LogSoftmax output layer
+
+### Process Flow:
+1. Process input through first linear layer
+2. Apply ReLU activation
+3. Process through second linear layer
+4. Apply LogSoftmax for classification probabilities
+
+## 7. EncoderClassifier Class
+Combines encoder and classifier for end-to-end classification.
+
+### Process Flow:
+1. Process input through encoder
+2. Take mean of encoder outputs
+3. Process through classifier
+4. Return classifications and attention maps
+
+## 8. Decoder Class
+Implements the decoder component for generative tasks.
+
+### Key Components:
+- Word embedding table
+- Positional embedding table
+- Multiple transformer blocks
+- Final layer normalization
+- Output projection to vocabulary size
+
+### Process Flow:
+1. Convert input tokens to embeddings
+2. Add positional embeddings
+3. Process through transformer blocks
+4. Apply final layer normalization
+5. Project to vocabulary size
+6. Calculate loss if training
+
+## Key Design Features
+
+1. **Modularity**:
+   - Each component is self-contained and reusable
+   - Clear separation of concerns between different parts
+   - Flexible architecture for various tasks
+
+2. **Training Features**:
+   - Built-in dropout for regularization
+   - Layer normalization for stability
+   - Residual connections to prevent vanishing gradients
+
+3. **Attention Mechanism**:
+   - Scaled dot-product attention
+   - Multi-head attention for parallel processing
+   - Optional causal masking for autoregressive tasks
+
+4. **Position Encoding**:
+   - Learnable positional embeddings
+   - Supports sequences up to block_size length
+   - Combined with token embeddings additively
